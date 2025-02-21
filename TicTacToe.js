@@ -2,6 +2,7 @@ class TicTacToe {
 	board = [];
 	n = 0;
 	player = 1;
+	winner = 0;
 
 	constructor(n) {
 		this.n = n;
@@ -17,10 +18,10 @@ class TicTacToe {
 
 	render() {
 		const gameBoard = document.getElementById('gameBoard');
-		gameBoard.className = "flex justify-center";
+		gameBoard.className = "flex flex-col items-center";
 
 		const board = document.createElement('div');
-		board.className = "grid w-80 h-80 border-8 border-teal-700 bg-teal-100 rounded-3xl text-center p-10";
+		board.className = "grid w-80 h-80 bg-sky-950 border-8 border-gray-900 shadow-2xl shadow-sky-200/50 rounded-3xl text-center p-10";
 
 		for (let i=0; i<this.n; i++) {
 			const row = document.createElement('div');
@@ -31,7 +32,22 @@ class TicTacToe {
 			board.appendChild(row);
 		}
 
-		gameBoard.replaceChildren(board);
+		const message = document.createElement('div');
+		if (this.winner == 0) {
+			message.className = 'pt-12 text-3xl ' + this.getCurrentPlayerColor('text');
+			message.textContent = 'Player ' + this.player;
+		}
+		else {
+			message.className = 'pt-12 text-3xl text-green-300';
+			message.textContent = 'Player ' + this.winner + ' Won!!!';
+		}
+		
+			
+		gameBoard.replaceChildren(board, message);
+	}
+
+	getCurrentPlayerColor(type) {
+		return type + '-' + ((this.player == 1) ? 'red-400' : 'gray-100');
 	}
 
 	renderCell(row, col) {
@@ -40,22 +56,63 @@ class TicTacToe {
 
 		switch (this.board[row][col]) {
 			case 1:
-				cell.innerHTML = '<span class="material-symbols-outlined text-red-600 text-5xl">circle</span>';
+				cell.innerHTML = '<span class="material-symbols-outlined text-red-400 text-5xl">circle</span>';
 				break;
 			case 2:
-				cell.innerHTML = '<span class="material-symbols-outlined text-gray-600 text-5xl">close</span>';
+				cell.innerHTML = '<span class="material-symbols-outlined text-gray-100 text-5xl">close</span>';
 				break;
 			default:
-				cell.innerHTML = '<button onClick="game.makeMove('+row+','+col+');" type="button" class="w-14 h-14 p-2 focus:outline-none bg-teal-400 rounded-lg hover:bg-yellow-300 focus:z-10 focus:ring-4 focus:ring-yellow-300"></button>';
+				cell.innerHTML = '<button onClick="game.makeMove('+row+','+col+');" type="button" class="w-14 h-14 p-2 focus:outline-none bg-slate-400 rounded-lg hover:' + this.getCurrentPlayerColor('bg') + ' focus:z-10 focus:ring-4 focus:ring-yellow-300"></button>';
 		}
-
+		
 		return cell;
 	}
 
 	makeMove(row, col) {
 		this.board[row][col] = this.player;
-		this.render();
+		this.detectWinner(this.player, row, col);
 		this.player = (this.player == 1) ? 2 : 1;
+		this.render();
+	}
+
+	detectWinner(player, row, col) {
+		// horizontal
+		let xWin = true;
+		for (let i=0; i<this.n; i++) {
+			if (this.board[row][i] != player) {
+				xWin = false;
+				break;
+			}
+		}
+		// vertical
+		let yWin = true;
+		for (let i=0; i<this.n; i++) {
+			if (this.board[i][col] != player) {
+				yWin = false;
+				break;
+			}
+		}
+		// diagonal NW-SE
+		let nwWin = true;
+		for (let i=0; i<this.n; i++) {
+			if (this.board[i][i] != player) {
+				nwWin = false;
+				break;
+			}
+		}
+		// diagonal SW-NE
+		let swWin = true;
+		for (let i=0; i<this.n; i++) {
+			if (this.board[this.n-i-1][i] != player) {
+				swWin = false;
+				break;
+			}
+		}
+
+		if (xWin || yWin || nwWin || swWin) {
+			this.winner = player;
+		}
+
 	}
 
 	test() {
@@ -67,7 +124,7 @@ class TicTacToe {
 
 		console.log(this.board);
 	}
-
+ 
 
 
 }
